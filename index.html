@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProTENS Control</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-glow: #38bdf8;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 20px rgba(56, 189, 248, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            color: var(--accent-glow);
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
+        .status {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #ef4444;
+            transition: 0.3s;
+        }
+        .status-dot.connected { background-color: #22c55e; box-shadow: 0 0 10px #22c55e; }
+
+        .btn-connect {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #0ea5e9, #3b82f6);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+        }
+        .btn-connect:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); }
+
+        .control-group {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .control-group h3 { margin-top: 0; font-size: 16px; margin-bottom: 15px; }
+
+        .toggle-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        /* Toggle Switch */
+        .switch { position: relative; display: inline-block; width: 60px; height: 34px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 26px; width: 26px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
+        input:checked + .slider:before { transform: translateX(26px); }
+
+        /* Rango de Intensidad */
+        .range-slider { width: 100%; margin-top: 10px; accent-color: var(--accent-glow); }
+        .intensity-val { text-align: right; font-weight: bold; color: var(--accent-glow); font-size: 1.2rem;}
+
+        /* Botones de Pulso */
+        .pulse-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .pulse-btn {
+            background: #334155;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            color: white;
+            padding: 15px 5px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            transition: 0.3s;
+        }
+        .pulse-btn i { font-size: 24px; }
+        .pulse-btn span { font-size: 12px; font-weight: bold;}
+        .pulse-btn.active {
+            border-color: var(--accent-glow);
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-glow);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-wave-square"></i> ProTENS</h1>
+            <div class="status">
+                <div class="status-dot" id="statusDot"></div>
+                <span id="statusText">Desconectado</span>
+            </div>
+        </div>
+
+        <button class="btn-connect" id="connectBtn">Conectar Equipo</button>
+
+        <div class="control-group">
+            <div class="toggle-row">
+                <span><i class="fa-solid fa-bolt"></i> Estimulación (TENS)</span>
+                <label class="switch">
+                    <input type="checkbox" id="tensToggle" disabled>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="toggle-row">
+                <span><i class="fa-solid fa-mobile-screen-button"></i> Motores de Vibración</span>
+                <label class="switch">
+                    <input type="checkbox" id="motorToggle" disabled>
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <div class="toggle-row" style="margin-bottom: 0;">
+                <h3><i class="fa-solid fa-gauge-high"></i> Intensidad</h3>
+                <span class="intensity-val" id="intensityValue">25</span>
+            </div>
+            <input type="range" min="0" max="255" value="25" class="range-slider" id="intensitySlider" disabled>
+        </div>
+
+        <div class="control-group">
+            <h3><i class="fa-solid fa-heart-pulse"></i> Modo de Pulso</h3>
+            <div class="pulse-grid">
+                <button class="pulse-btn active" data-mode="0" disabled>
+                    <i class="fa-solid fa-minus"></i>
+                    <span>Lineal</span>
+                </button>
+                <button class="pulse-btn" data-mode="1" disabled>
+                    <i class="fa-solid fa-slash"></i>
+                    <span>Látigo</span>
+                </button>
+                <button class="pulse-btn" data-mode="2" disabled>
+                    <i class="fa-solid fa-syringe"></i>
+                    <span>Aguja</span>
+                </button>
+                <button class="pulse-btn" data-mode="3" disabled>
+                    <i class="fa-solid fa-bug"></i>
+                    <span>Hormiga</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const serviceUuid = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+        const txCharacteristicUuid = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; 
+        
+        let bleDevice;
+        let bleServer;
+        let rxCharacteristic;
+
+        // Elementos de la UI
+        const connectBtn = document.getElementById('connectBtn');
+        const statusText = document.getElementById('statusText');
+        const statusDot = document.getElementById('statusDot');
+        const tensToggle = document.getElementById('tensToggle');
+
+const motorToggle = document.getElementById('motorToggle');
+        const intensitySlider = document.getElementById('intensitySlider');
+        const intensityValue = document.getElementById('intensityValue');
+        const pulseBtns = document.querySelectorAll('.pulse-btn');
+
+        // Conexión Bluetooth
+        connectBtn.addEventListener('click', async () => {
+            if (bleDevice && bleDevice.gatt.connected) {
+                bleDevice.gatt.disconnect();
+                return;
+            }
+
+            try {
+                statusText.innerText = "Buscando...";
+                bleDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'TENS_ESP32' }],
+                    optionalServices: [serviceUuid]
+                });
+
+                bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+                statusText.innerText = "Conectando...";
+                bleServer = await bleDevice.gatt.connect();
+                
+                const service = await bleServer.getPrimaryService(serviceUuid);
+                rxCharacteristic = await service.getCharacteristic(txCharacteristicUuid);
+
+                onConnected();
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Error o cancelado";
+            }
+        });
+
+        function onConnected() {
+            statusText.innerText = "Conectado";
+            statusDot.classList.add('connected');
+            connectBtn.innerText = "Desconectar";
+            connectBtn.style.background = "linear-gradient(135deg, #ef4444, #b91c1c)";
+            
+            // Habilitar controles
+            tensToggle.disabled = false;
+            motorToggle.disabled = false;
+            intensitySlider.disabled = false;
+            pulseBtns.forEach(btn => btn.disabled = false);
+        }
+
+        function onDisconnected() {
+            statusText.innerText = "Desconectado";
+            statusDot.classList.remove('connected');
+            connectBtn.innerText = "Conectar Equipo";
+            connectBtn.style.background = "linear-gradient(135deg, #0ea5e9, #3b82f6)";
+            
+            // Deshabilitar y resetear controles por seguridad
+            tensToggle.disabled = true; tensToggle.checked = false;
+            motorToggle.disabled = true; motorToggle.checked = false;
+            intensitySlider.disabled = true;
+            pulseBtns.forEach(btn => btn.disabled = true);
+        }
+
+        // Función central para enviar comandos
+        async function sendCommand(command) {
+            if (!rxCharacteristic) return;
+            try {
+                let encoder = new TextEncoder('utf-8');
+                await rxCharacteristic.writeValue(encoder.encode(command));
+            } catch (error) {
+                console.error('Error enviando comando:', error);
+            }
+        }
+
+        // --- Eventos de la UI ---
+        tensToggle.addEventListener('change', (e) => {
+            sendCommand(e.target.checked ? 'T1' : 'T0');
+        });
+
+        motorToggle.addEventListener('change', (e) => {
+            sendCommand(e.target.checked ? 'M1' : 'M0');
+        });
+
+        intensitySlider.addEventListener('input', (e) => {
+            intensityValue.innerText = e.target.value;
+        });
+
+        // Enviar la intensidad solo cuando el usuario suelta el slider para no saturar el Bluetooth
+        intensitySlider.addEventListener('change', (e) => {
+            sendCommand('D' + e.target.value);
+        });
+
+        pulseBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Quitar clase activa de todos
+                pulseBtns.forEach(b => b.classList.remove('active'));
+                // Añadir al clickeado
+                btn.classList.add('active');
+                // Enviar comando (ej: P0, P1, P2)
+                sendCommand('P' + btn.getAttribute('data-mode'));
+            });
+        });
+    </script>
+</body>
+</html>
