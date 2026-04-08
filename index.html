@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ProTENS Control</title>
+    <title>neckly</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -40,11 +40,32 @@
             margin-bottom: 30px;
         }
 
+        /* Nuevo contenedor para alinear el logo y el título */
+        .title-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 5px;
+        }
+
+        /* Estilos del marco redondo para el logo */
+        .logo-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%; /* Hace que el marco sea redondo */
+            object-fit: cover; /* Evita que la imagen se deforme */
+            background-color: #334155; /* Fondo de reserva */
+            border: 2px solid var(--accent-glow);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+        }
+
         .header h1 {
             margin: 0;
-            font-size: 28px;
+            font-size: 32px;
             color: var(--accent-glow);
             text-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+            text-transform: lowercase; /* Estilo sugerido para "neckly" */
         }
 
         .status {
@@ -142,7 +163,10 @@
 
     <div class="container">
         <div class="header">
-            <h1><i class="fa-solid fa-wave-square"></i> ProTENS</h1>
+            <div class="title-wrapper">
+                <img src="tu-logo.png" alt="Logo neckly" class="logo-img">
+                <h1>neckly</h1>
+            </div>
             <div class="status">
                 <div class="status-dot" id="statusDot"></div>
                 <span id="statusText">Desconectado</span>
@@ -212,8 +236,7 @@
         const statusText = document.getElementById('statusText');
         const statusDot = document.getElementById('statusDot');
         const tensToggle = document.getElementById('tensToggle');
-
-const motorToggle = document.getElementById('motorToggle');
+        const motorToggle = document.getElementById('motorToggle');
         const intensitySlider = document.getElementById('intensitySlider');
         const intensityValue = document.getElementById('intensityValue');
         const pulseBtns = document.querySelectorAll('.pulse-btn');
